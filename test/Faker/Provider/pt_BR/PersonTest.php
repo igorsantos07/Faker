@@ -19,15 +19,8 @@ class PersonTest extends \PHPUnit_Framework_TestCase
     {
         $cpf = $this->faker->cpf(false);
         $this->assertRegExp('/\d{9}\d{2}/', $cpf);
-        $cpf = $this->faker->cpf(true);
+        $cpf = $this->faker->cpf(Person::PERSON_CPF_FORMAT_MASKED);
         $this->assertRegExp('/\d{3}\.\d{3}\.\d{3}-\d{2}/', $cpf);
     }
 
-    public function testCnpjFormatIsValid()
-    {
-        $cnpj = $this->faker->cnpj(false);
-        $this->assertRegExp('/\d{8}\d{4}\d{2}/', $cnpj);
-        $cnpj = $this->faker->cnpj(true);
-        $this->assertRegExp('/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/', $cnpj);
-    }
 }
