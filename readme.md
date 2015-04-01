@@ -906,6 +906,14 @@ echo $faker->rg(Person::PERSON_RG_FORMAT_PLAIN); // '844057363'
 echo $faker->cpf; // '755.255.531-98'
 // or as integer
 echo $faker->cpf(Person::PERSON_CPF_FORMAT_PLAIN); // '75525553198'
+```
+
+### `Faker\Provider\pt_BR\Company`
+
+```php
+<?php
+
+use Faker\Provider\pt_BR\Company;
 
 // Generates a random registry of brazilian company identification number (in portuguese - Cadastro Nacional da Pessoa Jurídica - CNPJ )
 echo $faker->cnpj; // '23.663.478/0001-24'
