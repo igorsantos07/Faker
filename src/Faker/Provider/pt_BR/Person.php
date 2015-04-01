@@ -4,6 +4,11 @@ namespace Faker\Provider\pt_BR;
 
 class Person extends \Faker\Provider\Person
 {
+    const PERSON_CPF_FORMAT_MASKED = 'cpf_format_masked';
+    const PERSON_CPF_FORMAT_PLAIN = 'cpf_format_plain';
+    const PERSON_RG_FORMAT_MASKED = 'rg_format_masked';
+    const PERSON_RG_FORMAT_PLAIN = 'rg_format_plain';
+
     protected static $maleNameFormats = array(
         '{{firstNameMale}} {{lastName}}',
         '{{firstNameMale}} {{firstNameMale}} {{lastName}}',
@@ -100,58 +105,81 @@ class Person extends \Faker\Provider\Person
         return static::randomElement(static::$suffix);
     }
 
-
     /**
-     * A random CPF number.
-     * @link http://en.wikipedia.org/wiki/Cadastro_de_Pessoas_F%C3%ADsicas#Validation
-     * @param bool $formatted If the number should have dots/dashes or not.
+     * Cédula de Identidade - RG (SSP-SP)
+     * @link http://pt.wikipedia.org/wiki/C%C3%A9dula_de_identidade
+     *
+     * @param string $format
      * @return string
      */
-    public function cpf($formatted = true)
+    public static function rg($format = self::PERSON_RG_FORMAT_MASKED)
     {
-        $n = $this->generator->numerify('#########');
-        $n .= $this->verifierDigit($n);
-        $n .= $this->verifierDigit($n);
+        $randomRg = (string) mt_rand(10000000, 99999999);
+        $sum = 0;
 
-        return $formatted? vsprintf('%d%d%d.%d%d%d.%d%d%d-%d%d', str_split($n)) : $n;
+        for ($i=1; $i < 9; $i++) {
+            $sum += $randomRg[$i-1] * ($i+1);
+        }
+
+        $dv = $sum % 11;
+
+        if ($dv == 10) {
+            $dv = "X";
+        }
+
+        if ($format === self::PERSON_RG_FORMAT_MASKED) {
+            return substr($randomRg, 0, 2) . '.' . substr($randomRg, 2, 3) . '.' . substr($randomRg, 5, 3) . '-' . $dv;
+        }
+
+        return $randomRg.$dv;
     }
 
     /**
-     * A random CNPJ number.
-     * @link http://en.wikipedia.org/wiki/CNPJ
-     * @link http://pt.wikipedia.org/wiki/CNPJ#Algoritmo_de_Valida.C3.A7.C3.A3o
-     * @param bool $formatted If the number should have dots/slashes/dashes or not.
+     * Cadastro de Pessoas Físicas - CPF
+     * Returns a valid CPF number
+     *
+     * @link http://pt.wikipedia.org/wiki/Cadastro_de_Pessoas_F%C3%ADsicas
+     *
+     * @param string $format
      * @return string
      */
-    public function cnpj($formatted = true)
+    public static function cpf($format = self::PERSON_CPF_FORMAT_MASKED)
     {
-        $n = $this->generator->numerify('########0001');
-        $n .= $this->verifierDigit($n);
-        $n .= $this->verifierDigit($n);
+        $randomCpf = (string) mt_rand(100000000, 999999999);
 
-        return $formatted? vsprintf('%d%d.%d%d%d.%d%d%d/%d%d%d%d-%d%d', str_split($n)) : $n;
+        $firstDV = static::_mod11($randomCpf);
+        $secondDV = static::_mod11($randomCpf.$firstDV);
+
+        if ($format === self::PERSON_CPF_FORMAT_MASKED) {
+            return substr($randomCpf, 0, 3) . '.' . substr($randomCpf, 3, 3) . '.' .substr($randomCpf, 6, 3) . '-' . $firstDV.$secondDV;
+        }
+        
+        return $randomCpf.$firstDV.$secondDV;
     }
 
-    protected function verifierDigit($numbers)
+    /**
+     * Auxiliar method to calc mod11 of the random cpf
+     *
+     * @param int $cpf CPF only numbers
+     * @return int $dv
+     */
+    public static function _mod11($cpf)
     {
-        $length = strlen($numbers);
-        $second_algorithm = $length >= 12;
-        $verifier = 0;
+        $sum = 0;
+        $aux = 2;
 
-        for ($i = 1; $i <= $length; $i++) {
-            if (!$second_algorithm) {
-                $multiplier = $i+1;
-            } else {
-                $multiplier = ($i >= 9)? $i-7 : $i+1;
-            }
-            $verifier += $numbers[$length-$i] * $multiplier;
+        $length = strlen($cpf);
+
+        for ($i = $length - 1; $i >= 0; $i--) {
+            $sum = $sum + substr($cpf, $i, 1) * $aux++;
+        }
+        
+        $dv = 11 - ($sum % 11);
+
+        if ($dv > 9) {
+            $dv = 0;
         }
 
-        $verifier = 11 - ($verifier % 11);
-        if ($verifier >= 10) {
-            $verifier = 0;
-        }
-
-        return $verifier;
+        return $dv;
     }
 }
