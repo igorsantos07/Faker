@@ -892,13 +892,23 @@ echo $faker->phoneNumberCleared;    // not formatted, random landline or cellpho
 ```php
 <?php
 
+use Faker\Provider\pt_BR\Person;
+
 // The name generator may include double first or double last names, plus title and suffix
 echo $faker->name; // 'Sr. Luis Adriano Sepúlveda Filho'
 
-// Valid document generators have a boolean argument to remove formatting
-echo $faker->cpf;        // '145.343.345-76'
-echo $faker->cpf(false); // '45623467866'
-echo $faker->cnpj;       // '23.663.478/0001-24'
+// Generates a random identification number (in portuguese - Registro Geral RG do Estado de São Paulo) - based on SSP-SP algorithm
+echo $faker->rg; // '84.405.736-3'
+// or as integer
+echo $faker->rg(Person::PERSON_RG_FORMAT_PLAIN); // '844057363'
+
+// Generates a random registry of contributor's identification (in portuguese - Cadastro de Pessoa Física CPF)
+echo $faker->cpf; // '755.255.531-98'
+// or as integer
+echo $faker->cpf(Person::PERSON_CPF_FORMAT_PLAIN); // '75525553198'
+
+// Generates a random registry of brazilian company identification number (in portuguese - Cadastro Nacional da Pessoa Jurídica - CNPJ )
+echo $faker->cnpj; // '23.663.478/0001-24'
 ```
 
 ### `Faker\Provider\ro_RO\Person`
